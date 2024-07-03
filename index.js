@@ -1,18 +1,21 @@
-var editor = document.getElementById("editor");
-var pseudocode = document.getElementById("pseudocode");
+const editor = document.getElementById("editor");
+const pseudocode = document.getElementById("pseudocode");
+const domParser = new DOMParser();
 
 if (editor.addEventListener) {
 	editor.addEventListener('input', function() {
-		var val = parser(editor.value);
-		pseudocode.value = val;
-		pseudocode.innerText = val;
+		var val = parser(this.value);
+		var doc = domParser.parseFromString(val,"text/html");
+		const element = doc.getElementById("pseudocode-body");
+		pseudocode.parentNode.insertBefore(element,pseudocode);
 	});
 }
 else if (editor.attachEvent) {
 	editor.attachEvent('onpropertychange', function() {
-		var val = parser(editor.value);
-		pseudocode.value = val;
-		pseudocode.innerText = val;
+		var val = parser(this.value);
+		var doc = domParser.parseFromString(val,"text/html");
+		const element = doc.getElementById("pseudocode-body");
+		pseudocode.parentNode.insertBefore(element,pseudocode);
 	});
 }
 
@@ -21,10 +24,13 @@ editor.addEventListener('keydown', function(e) {
 		e.preventDefault();
 		var start = this.selectionStart;
 		var end = this.selectionEnd;
-
 		this.value = this.value.substring(0,start) + "\t" + this.value.substring(end);
-
 		this.selectionStart = this.selectionEnd = start + 1;
+
+		var val = parser(this.value);
+		var doc = domParser.parseFromString(val,"text/html");
+		const element = doc.getElementById("pseudocode-body");
+		pseudocode.parentNode.insertBefore(element,pseudocode);
 	}
 });
 
@@ -55,12 +61,26 @@ const FALSE = /\\False/g
 
 function parser(text) {
 	var lines = text.split('\n');
-	var result = "";
+	const body = document.getElementById("pseudocode-body");
+	if (body !== null) {
+		body.remove();
+	}
+	var result = "<div id=\"pseudocode-body\">";
 
 	for(var i = 0; i < lines.length; i++)
 	{
+		var tabs = 0;
+		for (var t = 0; t < lines[i].length; t++) {
+			if (lines[i][t] === "\t") {
+				tabs++;
+			}
+		}
+
+		result += "<p style=\"text-indent:"+ 40*tabs + "px\">";
+
 		if (lines[i].match(STATE)) {
-			result += lines[i].split('\\State')[1] + "\n";
+			result += lines[i].split('\\State')[1];
+			result += "</p>";
 		}
 		else if (lines[i].match(IF)){
 			result += "If " + lines[i].split('\\If')[1] + "\n";
@@ -133,5 +153,7 @@ function parser(text) {
 		}
 	}
 
+	result += "</div>";
+	
 	return result;
 }
