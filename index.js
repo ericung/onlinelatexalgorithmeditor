@@ -58,6 +58,8 @@ const NOT = /\\Not/g
 const TO = /\\To/g
 const TRUE = /\\True/g
 const FALSE = /\\False/g
+const LEFTCURLY = /\{/g
+const RIGHTCURLY = /\}/g
 
 function parser(text) {
 	var lines = text.split('\n');
@@ -79,11 +81,14 @@ function parser(text) {
 		result += "<p style=\"text-indent:"+ 40*tabs + "px\">";
 
 		if (lines[i].match(STATE)) {
-			result += lines[i].split('\\State')[1];
+			result += lines[i].split(STATE)[1];
 			result += "</p>";
 		}
 		else if (lines[i].match(IF)){
-			result += "If " + lines[i].split('\\If')[1] + "\n";
+			var IfExpr = lines[i].split(IF)[1];
+			var LeftCurl = IfExpr.split(LEFTCURLY)[1];
+			var Expr = LeftCurl.split(RIGHTCURLY)[0];
+			result += "If " + Expr + "\n";
 		}
 		else if (lines[i].match(ELSE)){
 			result += "Else " + lines[i].split('\\Else')[1] + "\n";
