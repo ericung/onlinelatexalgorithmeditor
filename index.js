@@ -4,7 +4,7 @@ const domParser = new DOMParser();
 
 if (editor.addEventListener) {
 	editor.addEventListener('input', function() {
-		var val = parser(this.value);
+		var val = parserToHtml(this.value);
 		var doc = domParser.parseFromString(val,"text/html");
 		const element = doc.getElementById("pseudocode-body");
 		pseudocode.parentNode.insertBefore(element,pseudocode);
@@ -12,7 +12,7 @@ if (editor.addEventListener) {
 }
 else if (editor.attachEvent) {
 	editor.attachEvent('onpropertychange', function() {
-		var val = parser(this.value);
+		var val = parserToHtml(this.value);
 		var doc = domParser.parseFromString(val,"text/html");
 		const element = doc.getElementById("pseudocode-body");
 		pseudocode.parentNode.insertBefore(element,pseudocode);
@@ -27,41 +27,41 @@ editor.addEventListener('keydown', function(e) {
 		this.value = this.value.substring(0,start) + "\t" + this.value.substring(end);
 		this.selectionStart = this.selectionEnd = start + 1;
 
-		var val = parser(this.value);
+		var val = parserToHtml(this.value);
 		var doc = domParser.parseFromString(val,"text/html");
 		const element = doc.getElementById("pseudocode-body");
 		pseudocode.parentNode.insertBefore(element,pseudocode);
 	}
 });
 
-const STATE = /\\State/g
-const IF = /\\If/g 
-const ELSE = /\\Else/g 
-const ELSIF = /\\ElsIf/g 
-const ENDIF = /\\EndIf/g
-const FOR = /\\For/g
-const ENDFOR = /\\EndFor/g
-const FORALL = /\\ForAll/g
-const WHILE = /\\While/g
-const REPEAT = /\\Repeat/g
-const LOOP = /\\Loop/g
-const ENDLOOP = /\\EndLoop/g
-const REQUIRE = /\\Require/g
-const ENSURE = /\\Ensure/g
-const RETURN = /\\Return/g
-const PRINT = /\\Print/g
-const COMMENT = /\\Comment/g
-const AND = /\\And/g
-const OR = /\\Or/g
-const XOR = /\\Xor/g
-const NOT = /\\Not/g
-const TO = /\\To/g
-const TRUE = /\\True/g
-const FALSE = /\\False/g
-const LEFTCURLY = /\{/g
-const RIGHTCURLY = /\}/g
+const STATE = /\\State/g;
+const IF = /\\If/g;
+const IFELSE = /\\IF\s*\{([^}]+\})\s*\\STATE\s*\{([^}]+\})\s*\\ELSE\s*\\STATE\s*\{([^}]+\})\s*\\ENDIF/g;
+const ELSE = /\\Else/g;
+const ELSIF = /\\ElsIf/g;
+const ENDIF = /\\EndIf/g;
+const FOR = /\\For/g;
+const ENDFOR = /\\EndFor/g;
+const FORALL = /\\ForAll/g;
+const WHILE = /\\While/g;
+const REPEAT = /\\Repeat/g;
+const LOOP = /\\Loop/g;
+const ENDLOOP = /\\EndLoop/g;
+const REQUIRE = /\\Require/g;
+const ENSURE = /\\Ensure/g;
+const RETURN = /\\Return/g;
+const PRINT = /\\Print/g;
+const COMMENT = /\\Comment/g;
+const AND = /\\And/g;
+const OR = /\\Or/g;
+const XOR = /\\Xor/g;
+const NOT = /\\Not/g;
+const TO = /\\To/g;
+const TRUE = /\\True/g;
+const FALSE = /\\False/g;
+const CURLY = /\{([^}]+\})/g;
 
-function parser(text) {
+function parserToHtml(text) {
 	var lines = text.split('\n');
 	const body = document.getElementById("pseudocode-body");
 	if (body !== null) {
@@ -78,87 +78,126 @@ function parser(text) {
 			}
 		}
 
-		result += "<p style=\"text-indent:"+ 40*tabs + "px\">";
-
-		if (lines[i].match(STATE)) {
-			result += lines[i].split(STATE)[1];
-			result += "</p>";
-		}
-		else if (lines[i].match(IF)){
-			var IfExpr = lines[i].split(IF)[1];
-			var LeftCurl = IfExpr.split(LEFTCURLY)[1];
-			var Expr = LeftCurl.split(RIGHTCURLY)[0];
-			result += "If " + Expr + "\n";
-		}
-		else if (lines[i].match(ELSE)){
-			result += "Else " + lines[i].split('\\Else')[1] + "\n";
-		}
-		else if (lines[i].match(ELSIF)){
-			result += "ElseIf " + lines[i].split('\\ElsIf')[1] + "\n";
-		}
-		else if (lines[i].match(ENDIF)){
-			result += "EndIf\n";
-		}
-		else if (lines[i].match(FOR)){
-			result += "For" + lines[i].split('\\For')[1] + "\n";
-		}
-		else if (lines[i].match(FORALL)){
-			result += "ForAll\n";
-		}
-		else if (lines[i].match(ENDFOR)){
-			result += "EndFor\n";
-		}
-		else if (lines[i].match(WHILE)){
-			result += "While\n" + lines[i].split('\\While')[1] + "\n";
-		}
-		else if (lines[i].match(REPEAT)){
-			result += "Repeat\n" + lines[i].split('\\Repeat')[1] + "\n";
-		}
-		else if (lines[i].match(LOOP)){
-			result += "Loop\n" + lines[i].split('\\Loop')[1] + "\n";
-		}
-		else if (lines[i].match(ENDLOOP)){
-			result += "EndLoop\n";
-		}
-		else if (lines[i].match(REQUIRE)){
-			result += "Require\n" + lines[i].split('\\Require')[1] + "\n";
-		}
-		else if (lines[i].match(ENSURE)){
-			result += "Ensure\n" + lines[i].split('\\Ensure')[1] + "\n";
-		}
-		else if (lines[i].match(RETURN)){
-			result += "Return\n";
-		}
-		else if (lines[i].match(PRINT)){
-			result += "Print\n" + lines[i].split('\\Print')[1] + "\n";
-		}
-		else if (lines[i].match(COMMENT)){
-			result += "Comment\n" + lines[i].split('\\Comment')[1] + "\n";
-		}
-		else if (lines[i].match(AND)){
-			result += "And\n";
-		}
-		else if (lines[i].match(OR)){
-			result += "Or\n";
-		}
-		else if (lines[i].match(XOR)){
-			result += "Xor\n";
-		}
-		else if (lines[i].match(NOT)){
-			result += "Not\n";
-		}
-		else if (lines[i].match(TO)){
-			result += "To\n";
-		}
-		else if (lines[i].match(TRUE)){
-			result += "True\n";
-		}
-		else if (lines[i].match(FALSE)){
-			result += "False\n";
-		}
+		result += "<p style=\"text-indent:"+ (40*tabs) + "px\">";
+		result += parser(lines[i]);	
+		result += "</p>";
 	}
 
 	result += "</div>";
 	
+	return result;
+}
+
+function parser(expression) {
+	var result = "";
+
+	if (expression.match(IFELSE)){
+		try {
+			var IfExpr = expression.match(CURLY)[0].replace("\{", "").replace("\}","");
+			var StateExpr = expression.match(CURLY)[1].replace("\{", "").replace("\}","");
+			var ElseExpr = expression.match(CURLY)[2].replace("\}","").replace("\{","");
+			result += "If " + IfExpr + " then " + StateExpr + " Else " + ElseExpr + " EndIf\n";
+		}
+		catch {
+		}
+	}
+	else if (expression.match(STATE)) {
+		try {
+			var StateExpr = expression.split(STATE)[1];
+			var Expr = StateExpr.match(CURLY)[0];
+			result += Expr + "\n";
+		}
+		catch {
+		}
+	}
+	else if (expression.match(IF)){
+		try {
+			var IfExpr = expression.split(IF)[1];
+			var Expr = IfExpr.match(CURLY)[0];
+			result += "If " + Expr + " then\n";
+		}
+		catch {
+		}
+	}
+	else if (expression.match(ELSE)){
+		try {
+			var ElseExpr = expression.split(ELSE)[1];
+			var Expr = ElseExpr.match(CURLY)[0];
+			result += "If " + Expr + "\n";
+		}
+		catch {
+		}
+		result += "Else " + expression.split('\\Else')[1] + "\n";
+	}
+	else if (expression.match(ELSIF)){
+		try {
+			var ElsifExpr = expression.split(ELSIF)[1];
+			var Expr = ElsifExpr.match(CURLY)[0];
+			result += "ElseIf " + Expr + "\n";
+		}
+		catch {
+		}
+	}
+	else if (expression.match(ENDIF)){
+		result += "EndIf\n";
+	}
+	else if (expression.match(FOR)){
+		result += "For" + expression.split('\\For')[1] + "\n";
+	}
+	else if (expression.match(FORALL)){
+		result += "ForAll\n";
+	}
+	else if (expression.match(ENDFOR)){
+		result += "EndFor\n";
+	}
+	else if (expression.match(WHILE)){
+		result += "While\n" + expression.split('\\While')[1] + "\n";
+	}
+	else if (expression.match(REPEAT)){
+		result += "Repeat\n" + expression.split('\\Repeat')[1] + "\n";
+	}
+	else if (expression.match(LOOP)){
+		result += "Loop\n" + expression.split('\\Loop')[1] + "\n";
+	}
+	else if (expression.match(ENDLOOP)){
+		result += "EndLoop\n";
+	}
+	else if (expression.match(REQUIRE)){
+		result += "Require\n" + expression.split('\\Require')[1] + "\n";
+	}
+	else if (expression.match(ENSURE)){
+		result += "Ensure\n" + expression.split('\\Ensure')[1] + "\n";
+	}
+	else if (expression.match(RETURN)){
+		result += "Return\n";
+	}
+	else if (expression.match(PRINT)){
+		result += "Print\n" + expression.split('\\Print')[1] + "\n";
+	}
+	else if (expression.match(COMMENT)){
+		result += "Comment\n" + expression.split('\\Comment')[1] + "\n";
+	}
+	else if (expression.match(AND)){
+		result += "And\n";
+	}
+	else if (expression.match(OR)){
+		result += "Or\n";
+	}
+	else if (expression.match(XOR)){
+		result += "Xor\n";
+	}
+	else if (expression.match(NOT)){
+		result += "Not\n";
+	}
+	else if (expression.match(TO)){
+		result += "To\n";
+	}
+	else if (expression.match(TRUE)){
+		result += "True\n";
+	}
+	else if (expression.match(FALSE)){
+		result += "False\n";
+	}
+
 	return result;
 }
