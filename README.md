@@ -22,3 +22,5 @@ EndIf
 ### References 
 
 https://stackoverflow.com/questions/18316395/javascript-for-handling-tab-key-press
+
+https://en.wikibooks.org/wiki/LaTeX/Algorithms
