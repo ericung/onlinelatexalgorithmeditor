@@ -93,9 +93,9 @@ function parser(expression) {
 
 	if (expression.match(IFELSE)){
 		try {
-			var IfExpr = expression.match(CURLY)[0].replace("\{", "").replace("\}","");
-			var StateExpr = expression.match(CURLY)[1].replace("\{", "").replace("\}","");
-			var ElseExpr = expression.match(CURLY)[2].replace("\}","").replace("\{","");
+			var IfExpr = clean(expression.match(CURLY)[0]);
+			var StateExpr = clean(expression.match(CURLY)[1]);
+			var ElseExpr = clean(expression.match(CURLY)[2]);
 			result += "If " + IfExpr + " then " + StateExpr + " Else " + ElseExpr + " EndIf\n";
 		}
 		catch {
