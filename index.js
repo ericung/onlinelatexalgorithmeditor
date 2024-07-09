@@ -95,8 +95,14 @@ function parser(expression) {
 		try {
 			var IfExpr = clean(expression.match(CURLY)[0]);
 			var StateExpr = clean(expression.match(CURLY)[1]);
+			var renderedStateExpr = katex.renderToString(StateExpr, {
+				throwOnError: false
+			});
 			var ElseExpr = clean(expression.match(CURLY)[2]);
-			result += "If " + IfExpr + " then " + StateExpr + " Else " + ElseExpr + " EndIf\n";
+			var renderedElseExpr = katex.renderToString(ElseExpr, {
+				throwOnError: false
+			});
+			result += "If " + IfExpr + " then " + renderedStateExpr + " Else " + renderedElseExpr + " EndIf\n";
 		}
 		catch {
 		}
@@ -104,7 +110,10 @@ function parser(expression) {
 	else if (expression.match(STATE)) {
 		try {
 			var StateExpr = clean(expression.split(STATE)[1]);
-			result += StateExpr + "\n";
+			var renderedStateExpr = katex.renderToString(StateExpr, {
+				throwOnError: false
+			});
+			result += renderedStateExpr + "\n";
 		}
 		catch {
 		}
